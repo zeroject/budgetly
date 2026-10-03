@@ -29,11 +29,6 @@ npm run build && npm start     # http://localhost:3000, data in ./data
 
 Hot reload: `npm run dev:api` in one terminal and `npm run dev` in another.
 
-## Releasing
-
-Run the **Release** workflow from the Actions tab (pick patch, minor or major). It builds and pushes
-the image, bumps the versions, tags and creates a GitHub release. Umbrel picks up the new version from the store.
-
 ## License
 
 MIT
