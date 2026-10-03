@@ -4,6 +4,7 @@ name: Budgetly
 tagline: Minimal monthly budgets that reset themselves
 category: finance
 version: "1.0.0"
+icon: https://raw.githubusercontent.com/zeroject/budgetly/main/zeroject-budgetly/icon.png
 port: 3847
 description: >-
   Track a handful of monthly budgets (groceries, eating out, fun...) instead of all your money.
