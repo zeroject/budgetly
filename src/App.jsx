@@ -95,6 +95,28 @@ function usePersistedState() {
   return [state, setState, loaded]
 }
 
+/* ---------- theme ---------- */
+
+const systemDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches
+
+function useTheme() {
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('budgetly-theme') || (systemDark() ? 'dark' : 'light')
+    } catch {
+      return systemDark() ? 'dark' : 'light'
+    }
+  })
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'dark' ? '#25221b' : '#f6f0de')
+    try {
+      localStorage.setItem('budgetly-theme', theme)
+    } catch {}
+  }, [theme])
+  return [theme, () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))]
+}
+
 /* ---------- radial ---------- */
 
 function Ring({ budget, spent, size = 168 }) {
@@ -308,6 +330,7 @@ function Detail({ budget, onClose, onChange, onEdit }) {
 export default function App() {
   const [state, setState, loaded] = usePersistedState()
   const [view, setView] = useState(null) // {type:'detail'|'edit'|'new', id}
+  const [theme, toggleTheme] = useTheme()
   const key = monthKey(new Date())
   const month = useMemo(() => new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' }), [])
 
@@ -323,9 +346,14 @@ export default function App() {
             {month} · resets in {daysLeftInMonth()} days
           </p>
         </div>
-        <button className="btn primary" onClick={() => setView({ type: 'new' })}>
-          + New budget
-        </button>
+        <div className="header-actions">
+          <button className="btn theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title="Toggle light/dark">
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button className="btn primary" onClick={() => setView({ type: 'new' })}>
+            + New budget
+          </button>
+        </div>
       </header>
 
       {loaded && state.budgets.length === 0 && (

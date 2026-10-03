@@ -10,7 +10,7 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #25221b; /* warm dark, not pure black */
     --card: #2f2b22;
     --ink: #f1ead6;
@@ -20,6 +20,16 @@
     --accent: #f1ead6;
     color-scheme: dark;
   }
+}
+:root[data-theme='dark'] {
+  --bg: #25221b; /* warm dark, not pure black */
+  --card: #2f2b22;
+  --ink: #f1ead6;
+  --muted: #9d957f;
+  --line: #3c372b;
+  --track: #3b3629;
+  --accent: #f1ead6;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -129,3 +139,6 @@ input[type='color'] { width: 40px; height: 32px; padding: 2px; border-radius: 10
   .add { flex-wrap: wrap; }
   .add input:first-child { width: 100%; }
 }
+
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.theme-toggle { width: 42px; height: 42px; padding: 0; font-size: 18px; line-height: 1; }
