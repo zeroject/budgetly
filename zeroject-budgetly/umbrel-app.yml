@@ -1,0 +1,23 @@
+manifestVersion: 1
+id: zeroject-budgetly
+name: Budgetly
+tagline: Minimal monthly budgets that reset themselves
+category: finance
+version: "1.0.0"
+port: 3847
+description: >-
+  Track a handful of monthly budgets (groceries, eating out, fun...) instead of all your money.
+  Every budget has its own name, emoji, currency and ring colors, and a radial shows at a glance
+  how much is left this month. Spending resets automatically every month and your history is kept.
+developer: zeroject
+website: https://github.com/zeroject/budgetly
+submitter: zeroject
+submission: https://github.com/zeroject/budgetly
+repo: https://github.com/zeroject/budgetly
+support: https://github.com/zeroject/budgetly/issues
+gallery: []
+releaseNotes: ""
+dependencies: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""

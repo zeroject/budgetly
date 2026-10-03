@@ -1,0 +1,131 @@
+:root {
+  --bg: #f6f0de; /* vanilla */
+  --card: #fbf7ea;
+  --ink: #2e2b25;
+  --muted: #8a8372;
+  --line: #e6dfc8;
+  --track: #ebe3cb;
+  --accent: #2e2b25;
+  --radius: 22px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #25221b; /* warm dark, not pure black */
+    --card: #2f2b22;
+    --ink: #f1ead6;
+    --muted: #9d957f;
+    --line: #3c372b;
+    --track: #3b3629;
+    --accent: #f1ead6;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 1000px; margin: 0 auto; padding: 40px 20px 80px; }
+h1 { font-size: 28px; margin: 0; letter-spacing: -0.02em; }
+h2 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+.muted { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+.grow { flex: 1; }
+
+header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 32px; }
+
+button, input, select { font: inherit; color: inherit; }
+.btn {
+  border: 0; border-radius: 999px; padding: 11px 20px; cursor: pointer;
+  background: var(--card); border: 1px solid var(--line); transition: transform .1s, opacity .15s;
+}
+.btn:active { transform: scale(.97); }
+.btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+.btn.ghost { background: transparent; }
+.btn.danger { color: #c4493f; background: transparent; }
+.btn.small { padding: 7px 14px; font-size: 14px; }
+.btn:disabled { opacity: .35; cursor: default; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 26px 20px 22px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; text-align: center; transition: transform .15s, box-shadow .15s;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px -14px rgba(60, 50, 20, .25); }
+.card-name { font-weight: 600; font-size: 17px; margin-top: 14px; }
+
+.ring { position: relative; }
+.ring-track { stroke: var(--track); }
+.ring-arc { transition: stroke-dashoffset .6s cubic-bezier(.4, 0, .2, 1), stroke .6s; }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-emoji { font-size: 26px; line-height: 1; margin-bottom: 6px; }
+.ring-left { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; }
+.ring-sub { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+
+.empty-state { text-align: center; color: var(--muted); padding: 60px 20px; max-width: 420px; margin: 0 auto; }
+.empty-state .big { font-size: 56px; margin-bottom: 8px; }
+
+/* modal */
+.backdrop {
+  position: fixed; inset: 0; background: rgba(46, 43, 37, .38); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10;
+  animation: fade .15s;
+}
+.sheet {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 28px; padding: 26px;
+  width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; animation: pop .2s;
+}
+@keyframes fade { from { opacity: 0 } }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.98) } }
+
+.detail-head { display: flex; justify-content: space-between; align-items: center; }
+.detail-ring { display: flex; flex-direction: column; align-items: center; text-align: center; margin: 18px 0 20px; }
+.detail-ring .muted { margin-top: 14px; }
+
+.add { display: flex; gap: 8px; margin-bottom: 14px; }
+.add input:first-child { width: 120px; }
+.add input:nth-child(2) { flex: 1; min-width: 0; }
+input, select {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px; width: 100%; outline: none;
+}
+input:focus, select:focus { border-color: var(--muted); }
+
+.entries { list-style: none; margin: 0; padding: 0; }
+.entries li { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-top: 1px solid var(--line); font-size: 15px; }
+.entries .empty { border: 0; justify-content: center; padding: 14px; }
+.entries .date { color: var(--muted); font-size: 13px; width: 54px; }
+.entries .note { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.entries .amt { font-weight: 600; }
+.x { border: 0; background: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
+.x:hover { color: #c4493f; }
+
+/* form */
+form .row { display: flex; gap: 10px; margin-bottom: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.row .field { margin-bottom: 0; }
+.field > span { font-size: 13px; color: var(--muted); }
+.emoji-field { width: 76px; }
+.emoji-field input { text-align: center; font-size: 22px; padding: 6px; }
+.emoji-picks { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 18px; }
+.emoji-picks button { border: 1px solid transparent; background: none; border-radius: 10px; font-size: 20px; padding: 4px 6px; cursor: pointer; }
+.emoji-picks button:hover, .emoji-picks button.on { background: var(--card); border-color: var(--line); }
+.gradient-bar { height: 12px; border-radius: 999px; }
+.colors { margin: 4px 0 0 !important; gap: 20px !important; font-size: 14px; }
+.colors label { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+input[type='color'] { width: 40px; height: 32px; padding: 2px; border-radius: 10px; cursor: pointer; }
+.presets { display: flex; gap: 8px; }
+.presets button { width: 56px; height: 22px; border-radius: 999px; border: 2px solid var(--bg); outline: 1px solid var(--line); cursor: pointer; }
+.actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+
+@media (max-width: 480px) {
+  main { padding: 24px 14px 60px; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .card { padding: 18px 8px; }
+  .add { flex-wrap: wrap; }
+  .add input:first-child { width: 100%; }
+}
