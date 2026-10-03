@@ -3,7 +3,7 @@ id: zeroject-budgetly
 name: Budgetly
 tagline: Minimal monthly budgets that reset themselves
 category: finance
-version: "1.0.0"
+version: "1.0.1"
 icon: https://raw.githubusercontent.com/zeroject/budgetly/main/zeroject-budgetly/icon.png
 port: 3847
 description: >-
@@ -17,7 +17,7 @@ submission: https://github.com/zeroject/budgetly
 repo: https://github.com/zeroject/budgetly
 support: https://github.com/zeroject/budgetly/issues
 gallery: []
-releaseNotes: ""
+releaseNotes: "Adds the app icon."
 dependencies: []
 path: ""
 defaultUsername: ""
