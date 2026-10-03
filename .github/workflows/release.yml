@@ -84,5 +84,5 @@ jobs:
           git add package.json package-lock.json zeroject-budgetly
           git commit -m "Release v${VERSION}"
           git tag "v${VERSION}"
-          git push origin HEAD:main --follow-tags
+          git push origin HEAD:main "v${VERSION}"
           gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
