@@ -31,8 +31,8 @@ Hot reload: `npm run dev:api` in one terminal and `npm run dev` in another.
 
 ## Releasing
 
-Bump `version` in `package.json` and in `zeroject-budgetly/umbrel-app.yml` + `docker-compose.yml`,
-then push a tag like `v1.0.1` to build and publish the image.
+Run the **Release** workflow from the Actions tab (pick patch, minor or major). It builds and pushes
+the image, bumps the versions, tags and creates a GitHub release. Umbrel picks up the new version from the store.
 
 ## License
 
