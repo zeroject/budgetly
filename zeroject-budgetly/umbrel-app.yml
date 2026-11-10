@@ -3,7 +3,7 @@ id: zeroject-budgetly
 name: Budgetly
 tagline: Minimal monthly budgets that reset themselves
 category: finance
-version: "1.0.2"
+version: "1.1.0"
 icon: https://raw.githubusercontent.com/zeroject/budgetly/main/zeroject-budgetly/icon.png
 port: 3847
 description: >-
@@ -17,7 +17,7 @@ submission: https://github.com/zeroject/budgetly
 repo: https://github.com/zeroject/budgetly
 support: https://github.com/zeroject/budgetly/issues
 gallery: []
-releaseNotes: "Adds a light/dark mode toggle."
+releaseNotes: "Adds monthly payments: tick bills like Wi-Fi as paid or not paid each month. They reset every month."
 dependencies: []
 path: ""
 defaultUsername: ""
