@@ -142,3 +142,47 @@ input[type='color'] { width: 40px; height: 32px; padding: 2px; border-radius: 10
 
 .header-actions { display: flex; align-items: center; gap: 10px; }
 .theme-toggle { width: 42px; height: 42px; padding: 0; font-size: 18px; line-height: 1; }
+
+/* monthly payments */
+.payments { margin-top: 44px; }
+.section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 16px; }
+.section-head h2 { font-size: 20px; }
+.pay-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.tile {
+  --tone: var(--muted);
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; cursor: pointer;
+  background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px 12px 16px;
+  transition: transform .15s, box-shadow .15s, background .2s, border-color .2s;
+}
+.tile:hover { transform: translateY(-3px); box-shadow: 0 10px 30px -14px rgba(60, 50, 20, .25); }
+.tile.paid { --tone: #4fb286; background: color-mix(in srgb, #4fb286 13%, var(--card)); border-color: color-mix(in srgb, #4fb286 45%, var(--line)); }
+.tile.unpaid { --tone: #e5645a; background: color-mix(in srgb, #e5645a 12%, var(--card)); border-color: color-mix(in srgb, #e5645a 45%, var(--line)); }
+.tile.overdue { --tone: #e0912f; background: color-mix(in srgb, #e0912f 14%, var(--card)); border-color: color-mix(in srgb, #e0912f 50%, var(--line)); }
+.tile-mark {
+  position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 13px; font-weight: 700; color: var(--tone); border: 2px solid var(--tone);
+}
+.tile.paid .tile-mark, .tile.unpaid .tile-mark, .tile.overdue .tile-mark { background: var(--tone); color: #fff; }
+.tile-emoji { font-size: 32px; line-height: 1; margin-bottom: 6px; }
+.tile-name { font-weight: 600; font-size: 16px; overflow-wrap: anywhere; }
+.tile-meta { font-size: 12.5px; color: var(--muted); }
+.tile.paid .tile-meta, .tile.unpaid .tile-meta, .tile.overdue .tile-meta { color: var(--tone); font-weight: 600; }
+
+.pay-question { font-weight: 600; margin: 22px 0 12px; font-size: 17px; }
+.pay-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pay-choice {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 20px 10px; border-radius: 20px; cursor: pointer;
+  background: var(--card); border: 2px solid var(--line); font-weight: 600; font-size: 16px; transition: transform .1s, border-color .15s, background .15s;
+}
+.pay-choice span { font-size: 30px; line-height: 1; }
+.pay-choice:active { transform: scale(.97); }
+.pay-choice.yes span { color: #4fb286; } .pay-choice.no span { color: #e5645a; }
+.pay-choice.yes:hover, .pay-choice.yes.on { border-color: #4fb286; background: color-mix(in srgb, #4fb286 14%, var(--card)); }
+.pay-choice.no:hover, .pay-choice.no.on { border-color: #e5645a; background: color-mix(in srgb, #e5645a 14%, var(--card)); }
+.pay-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 16px; font-size: 14px; }
+
+@media (max-width: 480px) {
+  .payments { margin-top: 34px; }
+  .pay-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .section-head { align-items: center; }
+}

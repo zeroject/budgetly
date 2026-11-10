@@ -44,7 +44,7 @@ async function handleApi(req, res) {
     try {
       res.end(await fs.readFile(DATA_FILE, 'utf8'))
     } catch {
-      res.end(JSON.stringify({ budgets: [] }))
+      res.end(JSON.stringify({ budgets: [], payments: [] }))
     }
     return
   }
@@ -52,6 +52,7 @@ async function handleApi(req, res) {
     try {
       const parsed = JSON.parse(await readBody(req))
       if (!parsed || !Array.isArray(parsed.budgets)) throw new Error('bad shape')
+      if (parsed.payments !== undefined && !Array.isArray(parsed.payments)) throw new Error('bad shape')
       const tmp = DATA_FILE + '.tmp'
       await fs.writeFile(tmp, JSON.stringify(parsed))
       await fs.rename(tmp, DATA_FILE) // atomic swap so a crash never corrupts data

@@ -39,23 +39,40 @@ const mix = (a, b, t) => {
   const B = hexToRgb(b)
   return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',')})`
 }
+const ordinal = (n) => {
+  const v = n % 100
+  if (v >= 11 && v <= 13) return `${n}th`
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`
+}
+// A payment is answered once a month; the answer is stored under that month, so the next month starts unanswered by itself.
+const payStatus = (p, key) => p.history?.[key] ?? 'pending'
+const isOverdue = (p, key) => payStatus(p, key) === 'pending' && p.day > 0 && key === monthKey(new Date()) && new Date().getDate() > p.day
+const withStatus = (p, key, status) => {
+  const history = { ...(p.history || {}) }
+  if (status === 'pending') delete history[key]
+  else history[key] = status
+  return { ...p, history }
+}
 const spentIn = (b, key) => b.entries.filter((e) => monthKey(e.date) === key).reduce((s, e) => s + e.amount, 0)
 
 /* ---------- persistence ---------- */
 
+// data saved before monthly payments existed has no `payments` list
+const normalise = (s) => ({ ...s, budgets: s.budgets || [], payments: s.payments || [] })
+
 function usePersistedState() {
-  const [state, setState] = useState({ budgets: [] })
+  const [state, setState] = useState({ budgets: [], payments: [] })
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     fetch('/api/state')
       .then((r) => r.json())
-      .then((s) => setState(s))
+      .then((s) => setState(normalise(s)))
       .catch(() => {
         // no backend (e.g. plain static hosting): fall back to this browser only
         try {
-          setState(JSON.parse(localStorage.getItem('budgetly') || '{"budgets":[]}'))
+          setState(normalise(JSON.parse(localStorage.getItem('budgetly') || '{"budgets":[]}')))
         } catch {}
         setFailed(true)
       })
@@ -69,7 +86,7 @@ function usePersistedState() {
       if (document.visibilityState !== 'visible') return
       fetch('/api/state')
         .then((r) => r.json())
-        .then((s) => setState((cur) => (JSON.stringify(cur) === JSON.stringify(s) ? cur : s)))
+        .then((s) => setState((cur) => (JSON.stringify(cur) === JSON.stringify(normalise(s)) ? cur : normalise(s))))
         .catch(() => {})
     }
     document.addEventListener('visibilitychange', sync)
@@ -325,6 +342,132 @@ function Detail({ budget, onClose, onChange, onEdit }) {
   )
 }
 
+/* ---------- monthly payments ---------- */
+
+const PAY_EMOJIS = ['📶', '🏠', '💡', '🔥', '💧', '📱', '📺', '🎵', '🚌', '🛡️', '💳', '🏦', '🧾', '🧹', '🅿️', '🏋️', '☁️', '📰', '🎓', '🐾']
+const STATUS_LABEL = { paid: 'Paid', unpaid: 'Not paid', pending: 'Not answered' }
+const STATUS_ICON = { paid: '✓', unpaid: '✗', pending: '○' }
+
+function PaymentForm({ initial, defaultCurrency, onSave, onClose, onDelete }) {
+  const [f, setF] = useState(initial || { name: '', emoji: '📶', day: '', amount: '', currency: defaultCurrency })
+  const set = (k, v) => setF((p) => ({ ...p, [k]: v }))
+  const valid = f.name.trim()
+  const day = Number(f.day)
+
+  return (
+    <Modal onClose={onClose}>
+      <h2>{initial ? 'Edit payment' : 'New monthly payment'}</h2>
+      <p className="muted" style={{ marginBottom: 18 }}>Something you pay by hand every month. Tap it to say whether you paid; it starts fresh each month.</p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (!valid) return
+          onSave({
+            ...f,
+            name: f.name.trim(),
+            emoji: f.emoji || '🧾',
+            day: day >= 1 && day <= 31 ? Math.round(day) : '',
+            amount: Number(f.amount) > 0 ? Number(f.amount) : '',
+          })
+        }}
+      >
+        <div className="row">
+          <label className="field emoji-field">
+            <span>Icon</span>
+            <input value={f.emoji} onChange={(e) => set('emoji', [...e.target.value].slice(-2).join(''))} aria-label="Emoji" />
+          </label>
+          <label className="field grow">
+            <span>Name</span>
+            <input autoFocus value={f.name} onChange={(e) => set('name', e.target.value)} placeholder="Wi-Fi" />
+          </label>
+        </div>
+        <div className="emoji-picks">
+          {PAY_EMOJIS.map((e) => (
+            <button type="button" key={e} className={e === f.emoji ? 'on' : ''} onClick={() => set('emoji', e)}>
+              {e}
+            </button>
+          ))}
+        </div>
+        <div className="row">
+          <label className="field grow">
+            <span>Due on day (optional)</span>
+            <input type="number" inputMode="numeric" min="1" max="31" value={f.day} onChange={(e) => set('day', e.target.value)} placeholder="5" />
+          </label>
+          <label className="field grow">
+            <span>Amount (optional)</span>
+            <input type="number" inputMode="decimal" min="0" step="any" value={f.amount} onChange={(e) => set('amount', e.target.value)} placeholder="299" />
+          </label>
+          <label className="field">
+            <span>Currency</span>
+            <select value={f.currency} onChange={(e) => set('currency', e.target.value)}>
+              {CURRENCIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="actions">
+          {onDelete && (
+            <button type="button" className="btn danger" onClick={onDelete}>
+              Delete
+            </button>
+          )}
+          <span className="grow" />
+          <button type="button" className="btn ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn primary" disabled={!valid}>
+            Save
+          </button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+function PaymentSheet({ payment, onClose, onChange, onEdit }) {
+  const key = monthKey(new Date())
+  const status = payStatus(payment, key)
+  const last = payStatus(payment, prevMonthKey())
+  const answer = (s) => {
+    onChange(withStatus(payment, key, s))
+    onClose()
+  }
+  return (
+    <Modal onClose={onClose}>
+      <div className="detail-head">
+        <h2>
+          {payment.emoji} {payment.name}
+        </h2>
+        <button className="btn ghost small" onClick={onEdit}>
+          Edit
+        </button>
+      </div>
+      <p className="muted">
+        {payment.day ? `Due on the ${ordinal(payment.day)}` : 'Monthly'}
+        {payment.amount ? ` · ${money(payment.amount, payment.currency)}` : ''} · resets in {daysLeftInMonth()} days
+      </p>
+      <p className="pay-question">Did you pay it this month?</p>
+      <div className="pay-choices">
+        <button className={'pay-choice yes' + (status === 'paid' ? ' on' : '')} onClick={() => answer('paid')}>
+          <span>✓</span> Yes, paid
+        </button>
+        <button className={'pay-choice no' + (status === 'unpaid' ? ' on' : '')} onClick={() => answer('unpaid')}>
+          <span>✗</span> Not yet
+        </button>
+      </div>
+      <div className="pay-foot muted">
+        <span>{last === 'pending' ? 'Last month: no answer' : `Last month: ${STATUS_LABEL[last].toLowerCase()}`}</span>
+        {status !== 'pending' && (
+          <button className="btn ghost small" onClick={() => answer('pending')}>
+            Clear answer
+          </button>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
 /* ---------- app ---------- */
 
 export default function App() {
@@ -335,7 +478,12 @@ export default function App() {
   const month = useMemo(() => new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' }), [])
 
   const update = (b) => setState((s) => ({ ...s, budgets: s.budgets.map((x) => (x.id === b.id ? b : x)) }))
+  const updatePayment = (p) => setState((s) => ({ ...s, payments: s.payments.map((x) => (x.id === p.id ? p : x)) }))
   const current = view?.id && state.budgets.find((b) => b.id === view.id)
+  const currentPayment = view?.id && state.payments.find((p) => p.id === view.id)
+  const paidCount = state.payments.filter((p) => payStatus(p, key) === 'paid').length
+  const overdueCount = state.payments.filter((p) => isOverdue(p, key)).length
+  const defaultCurrency = state.budgets[0]?.currency || state.payments[0]?.currency || 'DKK'
 
   return (
     <main>
@@ -374,6 +522,74 @@ export default function App() {
           </button>
         ))}
       </section>
+
+      <section className="payments">
+        <div className="section-head">
+          <div>
+            <h2>Monthly payments</h2>
+            <p className="muted">
+              {state.payments.length === 0
+                ? 'Bills you pay by hand, like Wi-Fi or rent. Tick them off once a month.'
+                : `${paidCount} of ${state.payments.length} paid this month${overdueCount ? ` · ${overdueCount} overdue` : ''}`}
+            </p>
+          </div>
+          <button className="btn small" onClick={() => setView({ type: 'newpay' })}>
+            + Add payment
+          </button>
+        </div>
+        {state.payments.length > 0 && (
+          <div className="pay-grid">
+            {state.payments.map((p) => {
+              const status = payStatus(p, key)
+              const overdue = isOverdue(p, key)
+              return (
+                <button key={p.id} className={`tile ${status}${overdue ? ' overdue' : ''}`} onClick={() => setView({ type: 'pay', id: p.id })}>
+                  <span className="tile-mark" aria-hidden="true">
+                    {overdue ? '!' : STATUS_ICON[status]}
+                  </span>
+                  <span className="tile-emoji">{p.emoji}</span>
+                  <span className="tile-name">{p.name}</span>
+                  <span className="tile-meta">
+                    {overdue ? `Overdue · due ${ordinal(p.day)}` : status === 'pending' ? (p.day ? `Due ${ordinal(p.day)}` : 'Not answered') : STATUS_LABEL[status]}
+                    {p.amount ? ` · ${money(p.amount, p.currency)}` : ''}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </section>
+
+      {view?.type === 'newpay' && (
+        <PaymentForm
+          defaultCurrency={defaultCurrency}
+          onClose={() => setView(null)}
+          onSave={(f) => {
+            setState((s) => ({ ...s, payments: [...s.payments, { ...f, id: uid(), history: {} }] }))
+            setView(null)
+          }}
+        />
+      )}
+      {view?.type === 'editpay' && currentPayment && (
+        <PaymentForm
+          initial={currentPayment}
+          defaultCurrency={defaultCurrency}
+          onClose={() => setView({ type: 'pay', id: currentPayment.id })}
+          onSave={(f) => {
+            updatePayment({ ...currentPayment, ...f })
+            setView({ type: 'pay', id: currentPayment.id })
+          }}
+          onDelete={() => {
+            if (confirm(`Delete "${currentPayment.name}" and its history?`)) {
+              setState((s) => ({ ...s, payments: s.payments.filter((p) => p.id !== currentPayment.id) }))
+              setView(null)
+            }
+          }}
+        />
+      )}
+      {view?.type === 'pay' && currentPayment && (
+        <PaymentSheet payment={currentPayment} onClose={() => setView(null)} onChange={updatePayment} onEdit={() => setView({ type: 'editpay', id: currentPayment.id })} />
+      )}
 
       {view?.type === 'new' && (
         <BudgetForm
